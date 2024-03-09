@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "key-mwe"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Francis Beeson", email = "leobeeson@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/unknown/key-mwe#readme"
+Issues = "https://github.com/unknown/key-mwe/issues"
+Source = "https://github.com/unknown/key-mwe"
+
+[tool.hatch.version]
+path = "src/key_mwe/__about__.py"
+
+[tool.hatch.envs.".venv"]
+python = "/usr/bin/python3.11"
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+
+[tool.hatch.envs.".venv".scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/key_mwe tests}"
+
+[tool.coverage.run]
+source_pkgs = ["key_mwe", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/key_mwe/__about__.py",
+]
+
+[tool.coverage.paths]
+key_mwe = ["src/key_mwe", "*/key-mwe/src/key_mwe"]
+tests = ["tests", "*/key-mwe/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
