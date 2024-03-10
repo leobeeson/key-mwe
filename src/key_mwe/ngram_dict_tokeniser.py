@@ -1,8 +1,9 @@
 from gensim.models.word2vec import LineSentence
 from collections import Counter
-
+from collections.abc import Iterator
 
 from src.key_mwe.config import SEPARATOR_TOKEN
+from src.key_mwe.text_preprocessor import Preprocessor
 
 
 class NgramDictTokeniser:
@@ -19,8 +20,16 @@ class NgramDictTokeniser:
 
 
     def tokenise_corpus_from_text_file(self, corpus_file: str) -> None:
+        # Assumption: Text file has had text already preprocessed elsewhere.
         for sentence in LineSentence(corpus_file):
             self.update_counts(sentence)
+
+
+    def tokenise_corpus_from_iterator(self, sentences: Iterator[str]) -> None:
+        preprocessor = Preprocessor()
+        for sentence in sentences:
+            sentence_processed: str = preprocessor.clean_line(sentence)
+            self.update_counts(sentence_processed.split())
 
 
     def update_counts(self, sentence: list[str]):

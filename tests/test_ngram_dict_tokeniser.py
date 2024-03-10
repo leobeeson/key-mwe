@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 from collections import Counter
-from src.key_mwe.ngram_dict_tokeniser import NgramDictTokeniser  # Adjust the import path based on your project structure
+from src.key_mwe.ngram_dict_tokeniser import NgramDictTokeniser
 
 
 @pytest.fixture

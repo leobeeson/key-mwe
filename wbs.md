@@ -5,11 +5,12 @@
 1. Data Ingestor
 2. Text Preprocessor
 3. Ngram Tokeniser
-4. ...
+4. Within-Corpus NPMI Estimator
+5. Cross-Corpus NPMI Estimator
 
 ## Data Ingestor
 
-...
+- Implement ingestor from `Iterator[str]` in Ngram Tokeniser. #DONE
 
 ## Text Preprocessor
 
@@ -22,3 +23,11 @@
 - Implement baseline unit tests. #DONE
 - Configure separator token as configurable var. #DONE
 - Inhibit ngrams with separator token. #DONE
+
+## Within-Corpus NPMI Estimator
+
+- Import wikipedia `es` data NPMI Estimator. #FOCUS
+
+## Cross-Corpora NPMI Estimator
+
+- Import wikipedia `es` data Cross-Corpora NPMI Estimator. #NOW
