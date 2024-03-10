@@ -41,6 +41,10 @@ def test_update_counts(ngram_dict_tokeniser: NgramDictTokeniser):
     (["With", "two", "sentences"], {1: Counter({"With": 1, "two": 1, "sentences": 1}),
                                     2: Counter({"With two": 1, "two sentences": 1}),
                                     3: Counter({"With two sentences": 1})}),
+    (["hello", "zuluzulu", "world", "zuluzulu", "zuluzulu", "cómo", "están", "zuluzulu", "numbers", "zuluzulu", "1234", "zuluzulu"],
+     {1: Counter({"hello": 1, "world": 1, "cómo": 1, "están": 1, "numbers": 1, "1234": 1}),
+        2: Counter({"cómo están": 1}),
+        3: Counter({})})
 ])
 def test_update_counts(ngram_dict_tokeniser: NgramDictTokeniser, corpus: list[list[str]], expected: dict[int, Counter]):
     ngram_dict_tokeniser.update_counts(corpus)
