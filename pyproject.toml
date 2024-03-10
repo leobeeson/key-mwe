@@ -20,7 +20,9 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
-dependencies = []
+dependencies = [
+  "gensim>=4.3.2"
+]
 
 [project.urls]
 Documentation = "https://github.com/unknown/key-mwe#readme"
