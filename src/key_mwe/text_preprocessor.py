@@ -9,6 +9,9 @@ from gensim.parsing.preprocessing import (
 )
 
 
+from src.key_mwe.config import SEPARATOR_TOKEN
+
+
 class Preprocessor:
 
 
@@ -24,12 +27,13 @@ class Preprocessor:
     def custom_strip_punctuation(self, sentence: str) -> str:
         spanish_punctuation: str = string.punctuation + '¡¿'
         RE_PUNCT: re.Pattern = re.compile(r'([%s])+' % re.escape(spanish_punctuation), re.UNICODE)
-        return RE_PUNCT.sub(' ZULUZULU ', sentence)
+        replacement: str = f" {SEPARATOR_TOKEN} "
+        return RE_PUNCT.sub(replacement, sentence)
 
 
     def custom_strip_non_alphanumeric(self, sentence: str) -> str:
         RE_NONALPHA = re.compile(r"[^\wáéíóúüñÁÉÍÓÚÜÑ]+", re.UNICODE)
-        return RE_NONALPHA.sub(' ', sentence)
+        return RE_NONALPHA.sub(" ", sentence)
 
 
     def clean_line(self, sentence: str, lower_case: bool = True) -> str:
