@@ -31,5 +31,6 @@
 
 ## Cross-Corpora NPMI Estimator
 
-- Import wikipedia `es` data Cross-Corpora NPMI Estimator. #FOCUS
-- Implement baseline unit tests. #FOCUS
+- Import wikipedia `es` data Cross-Corpora NPMI Estimator. #DONE
+- Implement baseline unit tests. #DONE
+- Implement unit tests for probs and npmi calculations. #FOCUS

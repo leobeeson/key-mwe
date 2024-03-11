@@ -120,7 +120,7 @@ def test_get_sorted_unigram_probs_with_reverse(npmi_estimator_complex: NpmiEstim
 
 
 def test_get_sorted_npmi_values_no_params(npmi_estimator_complex: NpmiEstimator) -> None:
-    npmi_estimator_complex.estimate_within_corpus_npmi()
+    npmi_estimator_complex.estimate_within_corpus_npmi(adjusted=True)
     sorted_npmi = npmi_estimator_complex.get_sorted_npmi_values()
     # There should not be npmi values for unigrams:
     assert len(sorted_npmi[1]) == 0
