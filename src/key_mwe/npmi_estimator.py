@@ -16,9 +16,6 @@ class NpmiEstimator:
         self.ngram_probs: dict[int, dict[str, float]] = {n: {} for n in self.ngrams.keys()}
         self.npmi_values: dict[int, dict[str, float]] = {n: {} for n in self.ngrams.keys()}
         self.total_counts = {n: sum(self.ngrams[n].values()) for n in self.ngrams.keys()}
-        self.log_probs = {}
-        if 1 in self.ngrams:
-            self.log_probs[1] = {token: math.log(prob) for token, prob in self.ngram_probs[1].items()}
 
 
     def estimate_within_corpus_npmi(self, adjusted: bool = True) -> None:
@@ -41,31 +38,35 @@ class NpmiEstimator:
         # prob of tokens in corpus
         if n > 1:
             p_tokens: list[float] = [self.get_ngram_prob(1, token) for token in tokens]
-            log_p_ngram = self.safe_log(p_ngram)
-            log_p_tokens = [self.safe_log(p) for p in p_tokens]
+            log_p_ngram: float = self.safe_log(p_ngram)
+            log_p_tokens: float = [self.safe_log(p) for p in p_tokens]
             # Calculate PMI
             log_prod_p_tokens: float = sum(log_p_tokens)  # log(a*b) = log(a) + log(b)
             pmi: float = log_p_ngram - log_prod_p_tokens  # log(a/b) = log(a) - log(b)
             # Normalizing PMI
-            npm: float = pmi / -log_p_ngram
+            npmi: float = pmi / -log_p_ngram
+            # Alternative approach to PMI calculation:
+            # prod_p_tokens: float = math.prod(p_tokens)
+            # pmi: float = math.log(p_ngram / prod_p_tokens)
+            # npmi: float = pmi / -math.log(p_ngram)
             # Adjusted NPMI Calculation
             if adjusted:
-                length_factor = math.log(1 + n)
-                freq_factor = math.log(1 + self.ngrams[n][ngram])
-                npm = (npm / length_factor) * freq_factor
+                length_factor: float = math.log(1 + n)
+                freq_factor: float = math.log(1 + self.ngrams[n][ngram])
+                npmi: float = (npmi / length_factor) * freq_factor
             # Caching the calculated NPMI value
-            self.npmi_values[n][ngram] = npm
+            self.npmi_values[n][ngram] = npmi
 
     
     def get_ngram_prob(self, n: int, ngram: str) -> float:
         if n in self.ngrams.keys():
-            ngrams_n = self.ngrams[n]
-            ngram_probs_n = self.ngram_probs[n]
+            ngrams_n: Counter = self.ngrams[n]
+            ngram_probs_n: dict[int, dict[str, float]] = self.ngram_probs[n]
             if ngram not in ngram_probs_n:
                 ngram_probs_n[ngram] = ngrams_n[ngram] / self.total_counts[n]
             return ngram_probs_n[ngram]
         else:
-            return NpmiEstimator.LOG_MIN_VALUE
+            return self.LOG_MIN_VALUE
 
 
     def get_npmi_value(self, n: int, ngram: str) -> float | None:
@@ -97,7 +98,7 @@ class NpmiEstimator:
 
 
     @staticmethod
-    def safe_log(value: float):
+    def safe_log(value: float) -> float:
         if value < NpmiEstimator.LOG_MIN_VALUE:
             return NpmiEstimator.LOG_MIN
         return math.log(value)
