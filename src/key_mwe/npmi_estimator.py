@@ -12,11 +12,13 @@ class NpmiEstimator:
     
 
     def __init__(self, ngrams: dict[int, Counter]) -> None:
-        self.ngrams = ngrams
+        self.ngrams = {n: counter for n, counter in ngrams.items() if counter}
         self.ngram_probs: dict[int, dict[str, float]] = {n: {} for n in self.ngrams.keys()}
         self.npmi_values: dict[int, dict[str, float]] = {n: {} for n in self.ngrams.keys()}
         self.total_counts = {n: sum(self.ngrams[n].values()) for n in self.ngrams.keys()}
-        self.log_probs = {1: {token: math.log(prob) for token, prob in self.ngram_probs[1].items()}}
+        self.log_probs = {}
+        if 1 in self.ngrams:
+            self.log_probs[1] = {token: math.log(prob) for token, prob in self.ngram_probs[1].items()}
 
 
     def estimate_within_corpus_npmi(self, adjusted: bool = True) -> None:
@@ -56,17 +58,22 @@ class NpmiEstimator:
 
     
     def get_ngram_prob(self, n: int, ngram: str) -> float:
-        ngrams_n = self.ngrams[n]
-        ngram_probs_n = self.ngram_probs[n]
-        if ngram not in ngram_probs_n:
-            ngram_probs_n[ngram] = ngrams_n[ngram] / self.total_counts[n]
-        return ngram_probs_n[ngram]
+        if n in self.ngrams.keys():
+            ngrams_n = self.ngrams[n]
+            ngram_probs_n = self.ngram_probs[n]
+            if ngram not in ngram_probs_n:
+                ngram_probs_n[ngram] = ngrams_n[ngram] / self.total_counts[n]
+            return ngram_probs_n[ngram]
+        else:
+            return NpmiEstimator.LOG_MIN_VALUE
 
 
     def get_npmi_value(self, n: int, ngram: str) -> float | None:
-        if ngram not in self.npmi_values[n]:
-            self.estimate_ngram_npmi(n, ngram)
-        return self.npmi_values[n].get(ngram)
+        if n in self.ngrams.keys():
+            if ngram not in self.npmi_values[n]:
+                self.estimate_ngram_npmi(n, ngram)
+            return self.npmi_values[n].get(ngram)
+        return None
     
 
     def get_sorted_unigram_probs(self, top_n: int = None, threshold: float = None, reverse: bool = True) -> list[tuple[str, float]]:
