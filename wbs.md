@@ -26,8 +26,10 @@
 
 ## Within-Corpus NPMI Estimator
 
-- Import wikipedia `es` data NPMI Estimator. #FOCUS
+- Import wikipedia `es` data NPMI Estimator. #DONE
+- Implement unit tests for probs and npmi calculations. #DONE
 
 ## Cross-Corpora NPMI Estimator
 
-- Import wikipedia `es` data Cross-Corpora NPMI Estimator. #NOW
+- Import wikipedia `es` data Cross-Corpora NPMI Estimator. #FOCUS
+- Implement baseline unit tests. #FOCUS
