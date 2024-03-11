@@ -32,6 +32,10 @@ class NpmiEstimator:
             return None
         # prob of ngram in corpus
         p_ngram: float = self.get_ngram_prob(n, ngram)
+        # If only one ngram in an ngram size, assume an npmi of "neutral":
+        if p_ngram == 1:
+            self.npmi_values[n][ngram] = 0
+            return
         # prob of tokens in corpus
         if n > 1:
             p_tokens: list[float] = [self.get_ngram_prob(1, token) for token in tokens]
