@@ -39,5 +39,7 @@
 ## Workflows
 
 - Define key definitions. #DONE
-- Identify types of use case workflows. #FOCUS
+- Identify types of use case workflows. #DONE
 - Document use case workflows. #FOCUS
+- Implement streamed corpus npmi extraction. #DONE
+- Implement streamed corpus keyness estimation. #NOW
