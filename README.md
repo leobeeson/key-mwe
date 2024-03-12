@@ -11,7 +11,12 @@
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [License](#license)
+  - [Use Cases](#use-cases)
+    - [Outputs](#outputs)
+    - [Data Ingestion](#data-ingestion)
   - [Usage](#usage)
+    - [Extract Keywords and Collocations](#extract-keywords-and-collocations)
+    - [Read Corpus from Disc](#read-corpus-from-disc)
   - [Definitions](#definitions)
     - [Keywords](#keywords)
     - [Multi-Word Expression (MWE)](#multi-word-expression-mwe)
@@ -31,7 +36,24 @@ pip install key-mwe
 
 `key-mwe` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
 
+## Use Cases
+
+### Outputs
+
+1. Extract `keywords` and `collocations` from a corpus.
+2. Estimate `keyword` keyness for a given domain.
+
+### Data Ingestion
+
+1. Stream corpus' text through an iterable.
+2. Read corpus from disc.
+
 ## Usage
+
+### Extract Keywords and Collocations
+
+
+### Read Corpus from Disc
 
 - Provide corpus as one or multiple text files.
 - Set up a `NgramDictTokenizer` defining:
