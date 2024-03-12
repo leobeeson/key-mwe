@@ -7,6 +7,7 @@
 3. Ngram Tokeniser
 4. Within-Corpus NPMI Estimator
 5. Cross-Corpus NPMI Estimator
+6. Workflows
 
 ## Data Ingestor
 
@@ -33,4 +34,10 @@
 
 - Import wikipedia `es` data Cross-Corpora NPMI Estimator. #DONE
 - Implement baseline unit tests. #DONE
-- Implement unit tests for probs and npmi calculations. #FOCUS
+- Implement unit tests for probs and npmi calculations. #DONE
+
+## Workflows
+
+- Define key definitions. #DONE
+- Identify types of use case workflows. #FOCUS
+- Document use case workflows. #FOCUS
