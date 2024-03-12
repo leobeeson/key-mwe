@@ -54,33 +54,28 @@ def test_keyness_estimator_accurately_calculates_cross_corpus_npmi(keyness_estim
     assert non_zero_npmi, "There should be non-zero NPMI values for overlapping bigrams, indicating a meaningful cross-corpus comparison."
 
 
-# # Test retrieval of n-gram probabilities from the reference corpus
-# def test_get_ngram_prob_ref(keyness_estimator: KeynessEstimator) -> None:
-#     prob = keyness_estimator.get_ngram_prob_ref(1, 'language')
-#     assert prob > 0, "'language' should have a positive probability in the reference corpus."
+def test_get_ngram_prob_from_ref_corpus(keyness_estimator: KeynessEstimator) -> None:
+    prob = keyness_estimator.get_ngram_prob_ref(1, 'language')
+    assert prob > KeynessEstimator.LOG_MIN_VALUE, "'language' should have a positive probability in the reference corpus."
 
-# # Test the retrieval of top n-grams based on keyness
-# def test_get_top_ngrams_by_keyness(keyness_estimator: KeynessEstimator) -> None:
-#     keyness_estimator.estimate_cross_corpus_npmi()  # Ensure NPMI values are calculated
-#     top_ngrams = keyness_estimator.get_top_ngrams(k=5)
-#     assert 'positive' in top_ngrams, "There should be a 'positive' category in the top n-grams."
-#     assert isinstance(top_ngrams['positive'], dict), "'positive' category should be a dictionary."
 
-#     # Checking that we have top n-grams for different n sizes
-#     for n in keyness_estimator.ngrams.keys():
-#         if n in top_ngrams['positive']:
-#             assert len(top_ngrams['positive'][n]) <= 5, f"Top n-grams for n={n} should have at most 5 entries."
+def test_get_top_ngrams_by_keyness(keyness_estimator: KeynessEstimator) -> None:
+    keyness_estimator.estimate_cross_corpus_npmi()
+    top_ngrams = keyness_estimator.get_top_ngrams(k=5)
+    assert "positive" in top_ngrams, "There should be a 'positive' category in the top n-grams."
+    assert 3 not in top_ngrams["positive"], "There should be no trigrams in the top n-grams because all trigrams violate the `min_freq: int = 5` parameter."
+    assert all(len(top_ngrams['positive'][n]) <= 5 for n in top_ngrams['positive']), "Each n in 'positive' should have at most 5 top n-grams."
 
-# # Test the function with threshold filtering
-# def test_get_top_ngrams_with_threshold(keyness_estimator: KeynessEstimator) -> None:
-#     keyness_estimator.estimate_cross_corpus_npmi()  # Recalculate with possible different settings
-#     threshold = 0.1  # Assume a test threshold for filtering based on keyness
-#     top_ngrams = keyness_estimator.get_top_ngrams(npmi_threshold=threshold)
-#     assert all(value[2] >= threshold for ngram_list in top_ngrams['positive'].values() for value in ngram_list), "All top n-grams should meet the NPMI threshold."
 
-# # Test the symmetric option
-# def test_get_top_ngrams_symmetric(keyness_estimator: KeynessEstimator) -> None:
-#     keyness_estimator.estimate_cross_corpus_npmi()  # Make sure calculations are up-to-date
-#     top_ngrams = keyness_estimator.get_top_ngrams(k=3, symmetric=True)
-#     assert 'negative' in top_ngrams, "Symmetric top n-grams should include 'negative' category."
-#     assert all(len(top_ngrams['negative'][n]) <= 3 for n in top_ngrams['negative']), "Each n in 'negative' should have at most 3 top n-grams."
+def test_get_top_ngrams_with_threshold(keyness_estimator: KeynessEstimator) -> None:
+    keyness_estimator.estimate_cross_corpus_npmi()
+    threshold = 0.1
+    top_ngrams = keyness_estimator.get_top_ngrams(npmi_threshold=threshold)
+    assert all(value[2] >= threshold for ngram_list in top_ngrams['positive'].values() for value in ngram_list), "All top n-grams should meet the NPMI threshold."
+
+
+def test_get_top_ngrams_symmetric(keyness_estimator: KeynessEstimator) -> None:
+    keyness_estimator.estimate_cross_corpus_npmi()
+    top_ngrams = keyness_estimator.get_top_ngrams(k=3, symmetric=True)
+    assert 'negative' in top_ngrams, "Symmetric top n-grams should include 'negative' category."
+    assert all(len(top_ngrams['negative'][n]) <= 3 for n in top_ngrams['negative']), "Each n in 'negative' should have at most 3 top n-grams."
