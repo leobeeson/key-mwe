@@ -12,8 +12,9 @@ class KeynessEstimator(NpmiEstimator):
     
     def __init__(self, ngrams_positive: dict[int, Counter], ngrams_reference: dict[int, Counter]) -> None:
         super().__init__(ngrams_positive)
-        self.ngrams_reference = {n: counter for n, counter in ngrams_reference.items() if counter}
-        self.total_counts_ref = {n: sum(self.ngrams_reference[n].values()) for n in self.ngrams_reference.keys()}
+        self.ngrams_reference: dict[int, Counter] = {n: counter for n, counter in ngrams_reference.items() if counter}
+        self.total_counts_ref: dict[int, int] = {n: sum(self.ngrams_reference[n].values()) for n in self.ngrams_reference.keys()}
+        self.keyness_values: dict[int, dict[str, float]] = {n: {} for n in ngrams_positive.keys()}
 
 
     def estimate_cross_corpus_npmi(self, adjusted: bool = True) -> None:
@@ -40,7 +41,7 @@ class KeynessEstimator(NpmiEstimator):
             length_factor: float = math.log(1 + n)
             freq_factor: float = math.log(1 + self.ngrams[n][ngram])
             npmi_cross: float = (npmi_cross / length_factor) * freq_factor
-        self.npmi_values[n][ngram] = npmi_cross
+        self.keyness_values[n][ngram] = npmi_cross
 
 
     def get_ngram_prob_ref(self, n: int, ngram: str) -> float:
@@ -60,10 +61,10 @@ class KeynessEstimator(NpmiEstimator):
         :param symmetric: If True, returns symmetric top k or n for both positive and reference corpus.
         :return: Nested dictionary of top n-grams.
         """
-        if not k and not npmi_threshold:
+        if k is None and npmi_threshold is None:
             raise ValueError("Either k or npmi_threshold must be provided.")
 
-        all_ngrams: list[tuple[str, int, int, float]] = [(ngram, n, self.ngrams[n][ngram], value) for n, values in self.npmi_values.items() for ngram, value in values.items() if self.ngrams[n][ngram] >= min_freq]
+        all_ngrams: list[tuple[str, int, int, float]] = [(ngram, n, self.ngrams[n][ngram], value) for n, values in self.keyness_values.items() for ngram, value in values.items() if self.ngrams[n][ngram] >= min_freq]
 
         all_ngrams.sort(key=lambda x: x[3], reverse=True)
 
@@ -82,7 +83,7 @@ class KeynessEstimator(NpmiEstimator):
                         top_ngrams_response["negative"][n] = []
                     top_ngrams_response["negative"][n].append((ngram, freq, value))
 
-        elif npmi_threshold:
+        elif npmi_threshold is not None:
             for ngram, n, freq, value in all_ngrams:
                 if value >= npmi_threshold:
                     if n not in top_ngrams_response["positive"]:

@@ -12,10 +12,10 @@ class NpmiEstimator:
     
 
     def __init__(self, ngrams: dict[int, Counter]) -> None:
-        self.ngrams = {n: counter for n, counter in ngrams.items() if counter}
+        self.ngrams: dict[int, Counter] = {n: counter for n, counter in ngrams.items() if counter}
         self.ngram_probs: dict[int, dict[str, float]] = {n: {} for n in self.ngrams.keys()}
         self.npmi_values: dict[int, dict[str, float]] = {n: {} for n in self.ngrams.keys()}
-        self.total_counts = {n: sum(self.ngrams[n].values()) for n in self.ngrams.keys()}
+        self.total_counts: dict[int, int] = {n: sum(self.ngrams[n].values()) for n in self.ngrams.keys()}
 
 
     def estimate_within_corpus_npmi(self, adjusted: bool = True) -> None:
@@ -95,6 +95,29 @@ class NpmiEstimator:
             if top_n:
                 sorted_values[n] = sorted_values[n][:top_n]
         return sorted_values
+
+
+    def get_unigrams_and_collocations(
+            self, 
+            top_n_unigrams: int = None, 
+            threshold_probs_unigrams: int = None,
+            top_n_collocations: int = None, 
+            threshold_npmi_collocations: float = None, 
+            reverse: bool = True
+        ) -> dict[int, list[tuple[str, float]]]:
+        sorted_unigrams: list[tuple[str, float]] = self.get_sorted_unigram_probs(
+            top_n=top_n_unigrams, 
+            threshold=threshold_probs_unigrams, 
+            reverse=reverse
+            )
+        sorted_collocations: dict[int, list[tuple[str, float]]] = self.get_sorted_npmi_values(
+            top_n=top_n_collocations, 
+            threshold=threshold_npmi_collocations, 
+            reverse=reverse
+            )
+        if len(sorted_unigrams) > 0:
+            sorted_collocations[1] = sorted_unigrams
+        return sorted_collocations
 
 
     @staticmethod
