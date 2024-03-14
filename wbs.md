@@ -40,6 +40,8 @@
 
 - Define key definitions. #DONE
 - Identify types of use case workflows. #DONE
-- Document use case workflows. #FOCUS
-- Implement streamed corpus npmi extraction. #DONE
-- Implement streamed corpus keyness estimation. #NOW
+- Document use case workflows. #DONE
+- Implement streamed corpus ngram extraction. #DONE
+- Implement streamed corpus keyness estimation. #DONE
+- Implement ingest from disc ngram extraction. #SOMEDAY
+- Implement ingest from disc keyness estimation. #SOMEDAY

@@ -5,18 +5,28 @@
 
 -----
 
+## About
+
+- Extracts keywords and multi-word expressions (MWE) using within corpus PMI.
+- Estimates keyword and MWE Keyness using between corpora PMI.
+
 ## Table of Contents
 
 - [key-mwe](#key-mwe)
+  - [About](#about)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [License](#license)
   - [Use Cases](#use-cases)
+    - [Inputs](#inputs)
     - [Outputs](#outputs)
-    - [Data Ingestion](#data-ingestion)
   - [Usage](#usage)
-    - [Extract Keywords and Collocations](#extract-keywords-and-collocations)
-    - [Read Corpus from Disc](#read-corpus-from-disc)
+    - [Ingestion](#ingestion)
+      - [Stream Corpus with Iterable](#stream-corpus-with-iterable)
+      - [Read Corpus from Disc](#read-corpus-from-disc)
+    - [Ngram Extraction](#ngram-extraction)
+      - [Extract Keywords and Collocations](#extract-keywords-and-collocations)
+      - [Estimate Keyword and Collocation Keyness](#estimate-keyword-and-collocation-keyness)
   - [Definitions](#definitions)
     - [Keywords](#keywords)
     - [Multi-Word Expression (MWE)](#multi-word-expression-mwe)
@@ -38,29 +48,108 @@ pip install key-mwe
 
 ## Use Cases
 
+### Inputs
+
+1. Stream corpus' text through an iterable.
+2. Read corpus from disc.
+
 ### Outputs
 
 1. Extract `keywords` and `collocations` from a corpus.
 2. Estimate `keyword` keyness for a given domain.
 
-### Data Ingestion
-
-1. Stream corpus' text through an iterable.
-2. Read corpus from disc.
-
 ## Usage
 
-### Extract Keywords and Collocations
+### Ingestion
 
+#### Stream Corpus with Iterable
 
-### Read Corpus from Disc
+- Provide corpus as an iterable object.
+- Set up a `NgramDictTokenizer` defining:
+  - `mwe_range`: Range of ngrams to count (i.e. bigrams, trigrams, four-grams, etc.) as a `list[int]`.
+  - `blacklist`: List of terms to ignore when building ngrams.
+- Pass the iterable object to `NgramDictTokeniser.tokenise_corpus_from_iterator(sentences: Iterator[str])`
+- Every sentence is preprocessed with some basic cleaning done by `Preprocessor.clean_line(sentence)`.
+
+  ```python
+  import nltk
+  from nltk.corpus import stopwords
+  # nltk.download('stopwords')
+  blacklist = set(stopwords.words("english"))
+  mwe_range: list[int] = [2, 3, 4]
+  content: str = "Some long content.\nWith multiple sentences.\nThe more the better."
+  sentences: list[str] = [sentence for sentence in content.split('\n') if sentence]
+  tokeniser = NgramDictTokeniser(mwe_range, blacklist)   
+  tokeniser.tokenise_corpus_from_iterator(sentences)
+  ngrams: dict[int, Counter] = tokeniser.get_ngrams()
+  ```
+
+#### Read Corpus from Disc
 
 - Provide corpus as one or multiple text files.
 - Set up a `NgramDictTokenizer` defining:
   - `mwe_range`: Range of ngrams to count (i.e. bigrams, trigrams, four-grams, etc.) as a `list[int]`.
   - `blacklist`: List of terms to ignore when building ngrams.
-- For every text file, run `NgramDictTokenizer.count_unigrams_and_ngrams(corpus_file_path: str)`.
+- For every text file, run `NgramDictTokeniser.tokenise_corpus_from_text_file(corpus_file_path: str)`.
   - Every additional text file updates the ngram counters in `NgramDictTokenizer.ngrams`.
+- Assumption: Text files have had text already preprocessed elsewhere.
+  - Text cleaning is an upstream activity, and user has the liberty to preprocess text as necessary for use case.
+
+```python
+  import nltk
+  from nltk.corpus import stopwords
+  # nltk.download('stopwords')
+  from src.key_mwe.ngram_dict_tokeniser import NgramDictTokeniser
+  
+  blacklist = set(stopwords.words("english"))
+  mwe_range: list[int] = [2, 3, 4]
+  filepath: str = "path/to/file.txt."
+  tokeniser = NgramDictTokeniser(mwe_range, blacklist)   
+  tokeniser.tokenise_corpus_from_text_file(filepath)
+  ngrams: dict[int, Counter] = tokeniser.get_ngrams()
+  ```
+
+### Ngram Extraction
+
+#### Extract Keywords and Collocations
+
+To extract high-probability keywords and high PMI collocations:
+
+  ```python
+  from src.key_mwe.npmi_estimator import NpmiEstimator
+
+  ngrams: dict[int, Counter] = tokeniser.get_ngrams() # From `Ingestion` above.
+  npmi_estimator = NpmiEstimator(ngrams)
+  npmi_estimator.estimate_within_corpus_npmi()
+  unigrams_and_collocations: dict[int, list[tuple[str, float]]] = npmi_estimator.get_unigrams_and_collocations(
+      threshold_probs_unigrams=0, 
+      threshold_npmi_collocations=0
+  )
+  ```
+
+#### Estimate Keyword and Collocation Keyness
+
+To estimate the keyness of keywords and collocations, you need a reference corpus against which to compare your corpus of interest:
+
+  ```python
+  from src.key_mwe.keyness_estimator import KeynessEstimator
+
+  ngrams: dict[int, Counter] = tokeniser.get_ngrams() # From `Ingestion` above.
+  content_reference: list[str] = [
+    "Content that is unrelated to your positive corpus.\nUse as many orthogonal domains as possible.",
+    "Long content fo domain A.\nWith multiple sentences.\nThe more the better.",
+    "Long content fo domain B.\nWith multiple sentences.\nThe more the better.",
+    "Long content fo domain C.\nWith multiple sentences.\nThe more the better."
+  ]
+  sentences_reference: list[str] = [sentence for content in content_reference for sentence in content.split("\n")]
+  tokeniser_reference = NgramDictTokeniser(mwe_range, blacklist)
+  ngrams_reference: dict[int, Counter] = tokeniser_reference.tokenise_corpus_from_iterator(sentences_reference)
+  keyness_estimator = KeynessEstimator(ngrams, ngrams_reference)
+  keyness_estimator.estimate_cross_corpus_npmi()
+  sorted_key_ngrams: dict[int, list[tuple[str, float]]] = keyness_estimator.get_top_ngrams(
+      npmi_threshold=0,
+      min_freq=3)
+  ```
 
 ## Definitions
 
