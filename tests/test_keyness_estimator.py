@@ -42,15 +42,15 @@ def test_keyness_estimator_initialization(keyness_estimator: KeynessEstimator) -
 
 def test_keyness_estimator_accurately_calculates_cross_corpus_npmi(keyness_estimator: KeynessEstimator) -> None:
     keyness_estimator.estimate_cross_corpus_npmi(adjusted=False)
-    assert 'data analysis' in keyness_estimator.npmi_values[2], "NPMI values should include 'data analysis' for bigrams."       
+    assert 'data analysis' in keyness_estimator.keyness_values[2], "NPMI values should include 'data analysis' for bigrams."       
     # Verify that common terms have NPMI values calculated and that they make sense relative to the corpus
     common_terms = ['data', 'model', 'language']  # Common terms expected to be in both corpora
     for term in common_terms:
         if term in keyness_estimator.ngrams[1]:
-            assert term in keyness_estimator.npmi_values[1], f"NPMI values should include the term '{term}' for unigrams."
+            assert term in keyness_estimator.keyness_values[1], f"NPMI values should include the term '{term}' for unigrams."
     # Check for non-zero NPMI values for at least some overlapping n-grams, npmi estimation is being executed correctly
     overlapping_ngrams = set(keyness_estimator.ngrams[2]) & set(keyness_estimator.ngrams_reference[2])
-    non_zero_npmi = [ngram for ngram in overlapping_ngrams if keyness_estimator.npmi_values[2].get(ngram, 0) != 0]
+    non_zero_npmi = [ngram for ngram in overlapping_ngrams if keyness_estimator.keyness_values[2].get(ngram, 0) != 0]
     assert non_zero_npmi, "There should be non-zero NPMI values for overlapping bigrams, indicating a meaningful cross-corpus comparison."
 
 
