@@ -9,7 +9,7 @@ from gensim.parsing.preprocessing import (
 )
 
 
-from src.key_mwe.config import SEPARATOR_TOKEN
+from .config import SEPARATOR_TOKEN
 
 
 class Preprocessor:

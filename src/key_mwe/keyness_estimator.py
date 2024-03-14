@@ -5,7 +5,7 @@ import logging
 from collections import Counter
 
 
-from src.key_mwe.npmi_estimator import NpmiEstimator
+from .npmi_estimator import NpmiEstimator
 
 
 class KeynessEstimator(NpmiEstimator):

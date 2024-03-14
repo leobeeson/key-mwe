@@ -75,6 +75,8 @@ pip install key-mwe
   import nltk
   from nltk.corpus import stopwords
   # nltk.download('stopwords')
+  from .ngram_dict_tokeniser import NgramDictTokeniser
+
   blacklist = set(stopwords.words("english"))
   mwe_range: list[int] = [2, 3, 4]
   content: str = "Some long content.\nWith multiple sentences.\nThe more the better."
@@ -99,7 +101,7 @@ pip install key-mwe
   import nltk
   from nltk.corpus import stopwords
   # nltk.download('stopwords')
-  from src.key_mwe.ngram_dict_tokeniser import NgramDictTokeniser
+  from key_mwe.ngram_dict_tokeniser import NgramDictTokeniser
   
   blacklist = set(stopwords.words("english"))
   mwe_range: list[int] = [2, 3, 4]
@@ -116,7 +118,7 @@ pip install key-mwe
 To extract high-probability keywords and high PMI collocations:
 
   ```python
-  from src.key_mwe.npmi_estimator import NpmiEstimator
+  from key_mwe.npmi_estimator import NpmiEstimator
 
   ngrams: dict[int, Counter] = tokeniser.get_ngrams() # From `Ingestion` above.
   npmi_estimator = NpmiEstimator(ngrams)
@@ -132,7 +134,7 @@ To extract high-probability keywords and high PMI collocations:
 To estimate the keyness of keywords and collocations, you need a reference corpus against which to compare your corpus of interest:
 
   ```python
-  from src.key_mwe.keyness_estimator import KeynessEstimator
+  from key_mwe.keyness_estimator import KeynessEstimator
 
   ngrams: dict[int, Counter] = tokeniser.get_ngrams() # From `Ingestion` above.
   content_reference: list[str] = [
@@ -143,12 +145,14 @@ To estimate the keyness of keywords and collocations, you need a reference corpu
   ]
   sentences_reference: list[str] = [sentence for content in content_reference for sentence in content.split("\n")]
   tokeniser_reference = NgramDictTokeniser(mwe_range, blacklist)
-  ngrams_reference: dict[int, Counter] = tokeniser_reference.tokenise_corpus_from_iterator(sentences_reference)
+  tokeniser_reference.tokenise_corpus_from_iterator(sentences_reference)
+  ngrams_reference: dict[int, Counter] = tokeniser_reference.get_ngrams()
   keyness_estimator = KeynessEstimator(ngrams, ngrams_reference)
   keyness_estimator.estimate_cross_corpus_npmi()
   sorted_key_ngrams: dict[int, list[tuple[str, float]]] = keyness_estimator.get_top_ngrams(
       npmi_threshold=0,
-      min_freq=3)
+      min_freq=3
+  )
   ```
 
 ## Definitions

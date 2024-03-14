@@ -1,6 +1,9 @@
 import pytest
 from collections import Counter
-from src.key_mwe.npmi_estimator import NpmiEstimator
+
+
+from key_mwe.npmi_estimator import NpmiEstimator
+
 
 @pytest.fixture
 def basic_ngrams() -> dict[int, Counter]:

@@ -1,6 +1,8 @@
 import pytest
 from collections import Counter
-from src.key_mwe.keyness_estimator import KeynessEstimator
+
+
+from key_mwe.keyness_estimator import KeynessEstimator
 
 
 @pytest.fixture

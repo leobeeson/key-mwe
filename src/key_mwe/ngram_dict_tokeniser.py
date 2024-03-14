@@ -2,8 +2,8 @@ from gensim.models.word2vec import LineSentence
 from collections import Counter
 from collections.abc import Iterator
 
-from src.key_mwe.config import SEPARATOR_TOKEN
-from src.key_mwe.text_preprocessor import Preprocessor
+from .config import SEPARATOR_TOKEN
+from .text_preprocessor import Preprocessor
 
 
 class NgramDictTokeniser:

@@ -2,9 +2,9 @@ from collections import Counter
 from collections.abc import Iterator
 
 
-from src.key_mwe.ngram_dict_tokeniser import NgramDictTokeniser
-from src.key_mwe.npmi_estimator import NpmiEstimator
-from src.key_mwe.keyness_estimator import KeynessEstimator
+from .ngram_dict_tokeniser import NgramDictTokeniser
+from .npmi_estimator import NpmiEstimator
+from .keyness_estimator import KeynessEstimator
 
 
 class StreamedPipeline:
