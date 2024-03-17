@@ -2,6 +2,7 @@ import pytest
 from collections import Counter
 
 
+from key_mwe.bespoke_types import keyness
 from key_mwe.keyness_estimator import KeynessEstimator
 
 
@@ -63,7 +64,7 @@ def test_get_ngram_prob_from_ref_corpus(keyness_estimator: KeynessEstimator) -> 
 
 def test_get_top_ngrams_by_keyness(keyness_estimator: KeynessEstimator) -> None:
     keyness_estimator.estimate_cross_corpus_npmi()
-    top_ngrams = keyness_estimator.get_top_ngrams(k=5)
+    top_ngrams = keyness_estimator.get_top_ngrams(top_k=5, min_freq=5)
     assert "positive" in top_ngrams, "There should be a 'positive' category in the top n-grams."
     assert 3 not in top_ngrams["positive"], "There should be no trigrams in the top n-grams because all trigrams violate the `min_freq: int = 5` parameter."
     assert all(len(top_ngrams['positive'][n]) <= 5 for n in top_ngrams['positive']), "Each n in 'positive' should have at most 5 top n-grams."
@@ -72,12 +73,12 @@ def test_get_top_ngrams_by_keyness(keyness_estimator: KeynessEstimator) -> None:
 def test_get_top_ngrams_with_threshold(keyness_estimator: KeynessEstimator) -> None:
     keyness_estimator.estimate_cross_corpus_npmi()
     threshold = 0.1
-    top_ngrams = keyness_estimator.get_top_ngrams(npmi_threshold=threshold)
-    assert all(value[2] >= threshold for ngram_list in top_ngrams['positive'].values() for value in ngram_list), "All top n-grams should meet the NPMI threshold."
+    top_ngrams: keyness = keyness_estimator.get_top_ngrams(npmi_threshold=threshold)
+    assert all(value[3] >= threshold for ngram_list in top_ngrams['positive'].values() for value in ngram_list), "All top n-grams should meet the NPMI threshold."
 
 
 def test_get_top_ngrams_symmetric(keyness_estimator: KeynessEstimator) -> None:
     keyness_estimator.estimate_cross_corpus_npmi()
-    top_ngrams = keyness_estimator.get_top_ngrams(k=3, symmetric=True)
+    top_ngrams = keyness_estimator.get_top_ngrams(top_k=3, symmetric=True)
     assert 'negative' in top_ngrams, "Symmetric top n-grams should include 'negative' category."
     assert all(len(top_ngrams['negative'][n]) <= 3 for n in top_ngrams['negative']), "Each n in 'negative' should have at most 3 top n-grams."
