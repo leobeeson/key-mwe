@@ -5,6 +5,7 @@ import logging
 from collections import Counter
 
 
+from .bespoke_types import keyness
 from .npmi_estimator import NpmiEstimator
 
 
@@ -52,7 +53,7 @@ class KeynessEstimator(NpmiEstimator):
             return self.LOG_MIN_VALUE
 
 
-    def get_top_ngrams(self, k: int | None = None, npmi_threshold: float | None = None, min_freq: int = 5, symmetric: bool = False) -> dict[str, dict[int, list[tuple[str, int, float]]]]:
+    def get_top_ngrams(self, top_k: int | None = None, npmi_threshold: float | None = None, min_freq: int = 3, symmetric: bool = False) -> keyness:
         """
         Retrieve top n-grams based on either k or npmi_threshold.
         
@@ -61,41 +62,50 @@ class KeynessEstimator(NpmiEstimator):
         :param symmetric: If True, returns symmetric top k or n for both positive and reference corpus.
         :return: Nested dictionary of top n-grams.
         """
-        if k is None and npmi_threshold is None:
-            raise ValueError("Either k or npmi_threshold must be provided.")
+        if top_k is None and npmi_threshold is None:
+            raise ValueError("Either top_k or npmi_threshold must be provided.")
 
-        all_ngrams: list[tuple[str, int, int, float]] = [(ngram, n, self.ngrams[n][ngram], value) for n, values in self.keyness_values.items() for ngram, value in values.items() if self.ngrams[n][ngram] >= min_freq]
+        all_ngrams: list[tuple[str, int, int, int, float]] = []
+        for n, values in self.keyness_values.items():
+            for ngram, value in values.items():
+                ngram_frequency_target: int = self.ngrams[n][ngram]
+                if ngram_frequency_target >= min_freq:
+                    ngram_frequency_reference: int = self.ngrams_reference[n].get(ngram, 0)
+                    all_ngrams.append((ngram, n, ngram_frequency_target, ngram_frequency_reference, value))
 
-        all_ngrams.sort(key=lambda x: x[3], reverse=True)
 
-        top_ngrams_response: dict[str, dict[int, list[tuple[str, int, float]]]] = {"positive": {}}
 
-        if k:
-            for ngram, n, freq, value in all_ngrams[:k]:
+        all_ngrams.sort(key=lambda x: x[4], reverse=True)
+
+        top_ngrams_response: keyness = {"positive": {}}
+
+        if top_k:
+            for ngram, n, freq_target, freq_ref, value in all_ngrams[:top_k]:
                 if n not in top_ngrams_response["positive"]:
                     top_ngrams_response["positive"][n] = []
-                top_ngrams_response["positive"][n].append((ngram, freq, value))
+                top_ngrams_response["positive"][n].append((ngram, freq_target, freq_ref, value))
             
             if symmetric:
                 top_ngrams_response["negative"] = {}
-                for ngram, n, freq, value in all_ngrams[-k:]:
+                for ngram, n, freq_target, freq_ref, value in all_ngrams[-top_k:]:
                     if n not in top_ngrams_response["negative"]:
                         top_ngrams_response["negative"][n] = []
-                    top_ngrams_response["negative"][n].append((ngram, freq, value))
+                    top_ngrams_response["negative"][n].append((ngram, freq_target, freq_ref, value))
 
         elif npmi_threshold is not None:
-            for ngram, n, freq, value in all_ngrams:
+            for ngram, n, freq_target, freq_ref, value in all_ngrams:
                 if value >= npmi_threshold:
                     if n not in top_ngrams_response["positive"]:
                         top_ngrams_response["positive"][n] = []
-                    top_ngrams_response["positive"][n].append((ngram, freq, value))
+                    top_ngrams_response["positive"][n].append((ngram, freq_target, freq_ref, value))
                 
             if symmetric:
                 top_ngrams_response["negative"] = {}
-                for ngram, n, freq, value in all_ngrams:
+                for ngram, n, freq_target, freq_ref, value in all_ngrams:
                     if value <= -npmi_threshold:
                         if n not in top_ngrams_response["negative"]:
                             top_ngrams_response["negative"][n] = []
-                        top_ngrams_response["negative"][n].append((ngram, freq, value))
+                        top_ngrams_response["negative"][n].append((ngram, freq_target, freq_ref, value))
+
 
         return top_ngrams_response
